@@ -43,6 +43,12 @@ final class GOESP {
     }
 }
 
+extension GOESP: CustomDebugStringConvertible {
+    var debugDescription: String {
+        return queues.map { "\($0)" }.joined(separator: "\n")
+    }
+}
+
 private extension GOESP {
     func append(symbol: Int, to queueIdx: Int) {
         guard queueIdx < queues.count else {
@@ -86,5 +92,15 @@ private extension GOESP {
             }
         }
         return nil
+    }
+}
+
+extension GOESP {
+    static func build(str: String) -> GOESP {
+        let grammar = GOESP()
+        str.forEach {
+            grammar.append(symbol: String($0))
+        }
+        return grammar
     }
 }

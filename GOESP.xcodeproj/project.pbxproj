@@ -11,6 +11,10 @@
 		C964DE90216A4A13002B39CD /* GOESP.swift in Sources */ = {isa = PBXBuildFile; fileRef = C964DE8F216A4A13002B39CD /* GOESP.swift */; };
 		C964DE91216A5155002B39CD /* GOESP.swift in Sources */ = {isa = PBXBuildFile; fileRef = C964DE8F216A4A13002B39CD /* GOESP.swift */; };
 		C964DE93216A5645002B39CD /* GOESPTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C964DE92216A5645002B39CD /* GOESPTestCase.swift */; };
+		C9F8FCBA2171F48C00DEACF4 /* KMerTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F8FCB92171F48C00DEACF4 /* KMerTestCase.swift */; };
+		C9F8FCBC2171F4CB00DEACF4 /* ChangesTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F8FCBB2171F4CB00DEACF4 /* ChangesTestCase.swift */; };
+		C9F8FCBE2171F7A900DEACF4 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F8FCBD2171F7A900DEACF4 /* StringExtension.swift */; };
+		C9F8FCBF2171F82900DEACF4 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F8FCBD2171F7A900DEACF4 /* StringExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,6 +36,9 @@
 		C964DE8A216A49C2002B39CD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C964DE8F216A4A13002B39CD /* GOESP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GOESP.swift; sourceTree = "<group>"; };
 		C964DE92216A5645002B39CD /* GOESPTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GOESPTestCase.swift; sourceTree = "<group>"; };
+		C9F8FCB92171F48C00DEACF4 /* KMerTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMerTestCase.swift; sourceTree = "<group>"; };
+		C9F8FCBB2171F4CB00DEACF4 /* ChangesTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesTestCase.swift; sourceTree = "<group>"; };
+		C9F8FCBD2171F7A900DEACF4 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +91,8 @@
 			children = (
 				C964DE8A216A49C2002B39CD /* Info.plist */,
 				C964DE92216A5645002B39CD /* GOESPTestCase.swift */,
+				C9F8FCB92171F48C00DEACF4 /* KMerTestCase.swift */,
+				C9F8FCBB2171F4CB00DEACF4 /* ChangesTestCase.swift */,
 			);
 			path = "GOESP-Tests";
 			sourceTree = "<group>";
@@ -92,6 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				C964DE8F216A4A13002B39CD /* GOESP.swift */,
+				C9F8FCBD2171F7A900DEACF4 /* StringExtension.swift */,
 			);
 			path = Structure;
 			sourceTree = "<group>";
@@ -186,6 +196,7 @@
 			files = (
 				C964DE90216A4A13002B39CD /* GOESP.swift in Sources */,
 				C964DE7C216A4987002B39CD /* main.swift in Sources */,
+				C9F8FCBE2171F7A900DEACF4 /* StringExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,7 +205,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				C964DE93216A5645002B39CD /* GOESPTestCase.swift in Sources */,
+				C9F8FCBC2171F4CB00DEACF4 /* ChangesTestCase.swift in Sources */,
+				C9F8FCBF2171F82900DEACF4 /* StringExtension.swift in Sources */,
 				C964DE91216A5155002B39CD /* GOESP.swift in Sources */,
+				C9F8FCBA2171F48C00DEACF4 /* KMerTestCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
