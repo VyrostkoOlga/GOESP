@@ -9,6 +9,17 @@
 import Foundation
 
 final class GOESP {
+    struct StackElement: Equatable {
+        typealias This = StackElement
+
+        let symbol: Int
+        let level: Int
+
+        static func == (lhs: This, rhs: This) -> Bool {
+            return lhs.symbol == rhs.symbol && lhs.level == rhs.level
+        }
+    }
+
     private(set) var queues = [[Int]]()
     private(set) var alph = [String]()
 
@@ -102,5 +113,36 @@ extension GOESP {
             grammar.append(symbol: String($0))
         }
         return grammar
+    }
+}
+
+// MARK: - search
+
+extension GOESP {
+    /**
+     Creates an embedding of substring to a grammar if it's possible
+     */
+    func embed(str: String) -> [StackElement]? {
+        if str.isEmpty { return nil }
+        var stack = [StackElement]()
+        for symbol in str {
+            guard let alphSymbol = alph.firstIndex(of: String(symbol)) else {
+                return nil
+            }
+            stack.append(StackElement(symbol: alphSymbol, level: 0))
+            while stack.count >= 2, stack[stack.count - 2].level == stack[stack.count - 1].level {
+                let right = stack.popLast()!
+                let left = stack.popLast()!
+                guard let symbol = rule(
+                    left: left.symbol,
+                    right: right.symbol,
+                    in: left.level
+                ) else {
+                    return nil
+                }
+                stack.append(StackElement(symbol: symbol, level: left.level + 1))
+            }
+        }
+        return stack
     }
 }
