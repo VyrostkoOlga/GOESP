@@ -138,7 +138,7 @@ extension GOESP {
                     right: right.symbol,
                     in: left.level
                 ) else {
-                    return nil
+                    return stack + [left, right]
                 }
                 stack.append(StackElement(symbol: symbol, level: left.level + 1))
             }

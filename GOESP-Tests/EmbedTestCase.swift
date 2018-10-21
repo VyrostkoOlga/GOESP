@@ -8,6 +8,11 @@
 
 import XCTest
 
+/**
+ Problems:
+ - could not correctly process borders between rules, f.e. AACT
+ */
+
 final class EmbedTestCase: XCTestCase {
 
     func testEmbedTwoLetterString() {
@@ -28,17 +33,21 @@ final class EmbedTestCase: XCTestCase {
 
     func testEmbedFourLetterString() {
         var embedding = grammar.embed(str: "CAAC")
+        XCTAssertEqual([GOESP.StackElement(symbol: 1, level: 1), GOESP.StackElement(symbol: 2, level: 1)], embedding!)
+        embedding = grammar.embed(str: "AACA")
         XCTAssertEqual([GOESP.StackElement(symbol: 0, level: 2)], embedding!)
-        //embedding = grammar.embed(str: "CTA")
-        //XCTAssertNil(embedding)
+        embedding = grammar.embed(str: "ACAA")
+        XCTAssertEqual([GOESP.StackElement(symbol: 2, level: 2)], embedding!)
+        embedding = grammar.embed(str: "AACT")
     }
 }
 
 
 /**
+ AA CA AC TA AC AA
  [0, 0, 1, 0, 0, 1, 2, 0]
- [0, 1, 2, 3, 2]
- [0, 1]
+ [0, 1, 2, 3, 2, 0]
+ [0, 1, 2]
  [0]
  */
 private let grammar = GOESP.build(str: "AACAACTAACAA")
