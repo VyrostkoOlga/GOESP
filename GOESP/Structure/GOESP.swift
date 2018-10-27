@@ -23,6 +23,12 @@ final class GOESP {
     private(set) var queues = [[Int]]()
     private(set) var alph = [String]()
 
+    var count: Int {
+        var count = 0
+        queues.forEach { count += $0.count }
+        return count
+    }
+
     func append(symbol: String) {
         let rule: Int
         if let idx = alph.firstIndex(of: symbol) {

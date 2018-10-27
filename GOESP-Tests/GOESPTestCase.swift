@@ -52,11 +52,12 @@ final class GOESPTestCase: XCTestCase {
         let alph = ["A", "C", "T", "G"]
         let grammar = GOESP()
         var str = ""
-        for count in 1..<200 {
-            print(count)
+        for count in 1..<2000000 {
             let rand = Int(arc4random_uniform(UInt32(alph.count)))
             str.append(alph[rand])
             grammar.append(symbol: alph[rand])
+            print("\(count) -> \(grammar.count)")
+            print(Double(grammar.count) / count)
             XCTAssertEqual(str, grammar.product())
         }
     }
