@@ -17,6 +17,10 @@ final class ChangesTestCase: XCTestCase {
         checkOneLetterMutation(alph: ["A", "C"], strLen: 6)
     }
 
+    func testTwoLetterAlph10Mer() {
+        checkOneLetterMutation(alph: ["A", "C"], strLen: 10)
+    }
+
     func testFourLetterAlph6Mer() {
         checkOneLetterMutation(alph: ["A", "C", "G", "T"], strLen: 6)
     }
@@ -30,14 +34,17 @@ private extension ChangesTestCase {
     func checkOneLetterMutation(alph: [String], strLen: Int) {
         let startString = String(alph: alph, len: strLen)
         print(startString)
-        print(GOESP.build(str: startString))
+        let g1 = GOESP.build(str: startString)
+        print(g1)
         print("---------")
         for i in 0..<strLen {
             let index = startString.index(startString.startIndex, offsetBy: i)
             alph.forEach {
                 let str = startString.replacingCharacters(in: index...index, with: $0)
                 print(str)
-                print(GOESP.build(str: str))
+                let g2 = GOESP.build(str: str)
+                print(g2)
+                print(g1.findLevelsDiffUp(other: g2))
                 print("---------")
             }
         }

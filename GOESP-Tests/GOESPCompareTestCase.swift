@@ -44,6 +44,34 @@ final class GOESPCompareTestCase: XCTestCase {
         g2 = GOESP.build(str: "TAAA")
         diff = g1.findLevelsDiffUp(other: g2)
         XCTAssertEqual([Set([0, 2]), Set([0, 1]), Set([0])], diff)
+
+        g2 = GOESP.build(str: "CACA")
+        diff = g1.findLevelsDiffUp(other: g2)
+        // note - correct?
+        XCTAssertEqual([Set([0]), Set([0, 1]), Set([0])], diff)
+
+        // equal
+        g2 = GOESP.build(str: "AACA")
+        XCTAssertEqual([Set<Int>(), Set(), Set()], g1.findLevelsDiffUp(other: g2))
+    }
+
+    func testCompare6Mers() {
+        let g1 = GOESP.build(str: "AACCCA")
+        var g2 = GOESP.build(str: "ACCCCA")
+        var diff = g1.findLevelsDiffUp(other: g2)
+        XCTAssertEqual([Set([1]), Set([0]), Set([0])], diff)
+
+        g2 = GOESP.build(str: "CACCCA")
+        diff = g1.findLevelsDiffUp(other: g2)
+        XCTAssertEqual([Set([0]), Set([0, 2]), Set([0])], diff)
+
+        g2 = GOESP.build(str: "CACACA")
+        diff = g1.findLevelsDiffUp(other: g2)
+        XCTAssertEqual([Set([0]), Set([0, 1, 2]), Set([0])], diff)
+
+        g2 = GOESP.build(str: "AACCCA")
+        diff = g1.findLevelsDiffUp(other: g2)
+        XCTAssertEqual([Set<Int>(), Set(), Set()], diff)
     }
 
 }
