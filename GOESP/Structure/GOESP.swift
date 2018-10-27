@@ -146,3 +146,59 @@ extension GOESP {
         return stack
     }
 }
+
+// MARK: - compare
+
+extension GOESP {
+    /**
+     Iterate on levels and find differences for each level
+     For example:
+     grammar 1: [0, 0, 1, 1, 1, 0], [0, 1, 2], [0]
+     grammar 2: [0, 0, 1, 0], [0, 1, 1], [0]
+     diff: [3, 4, 5], [1, 2], []
+    */
+    func findLevelsDiffUp(other: GOESP) -> [[Int]] {
+        var idx = 0
+        var diff = [[Int]]()
+        var prevDiff = Set<Int>()
+        while idx < queues.count {
+            let q1 = queues[idx]
+            let q2 = other.queues[idx]
+            let border = min(q1.count, q2.count) / 2
+            var curDiff = [Int]()
+            for i in 0..<border {
+                var el = q1[i * 2]
+                if el != q2[i * 2] || prevDiff.contains(where: { $0 == el * 2 || $0 == el * 2 + 1 }) {
+                    curDiff.append(i * 2)
+                }
+                el = q1[i * 2 + 1]
+                if el != q2[i * 2 + 1] || prevDiff.contains(where: { $0 == el * 2 || $0 == el * 2 + 1 }) {
+                    curDiff.append(i * 2 + 1)
+                }
+            }
+            let bound = border * 2
+            if q1.count == q2.count {
+                for i in bound..<q1.count {
+                    if q1[i] != q2[i] || prevDiff.contains(q1[i] * 2) {
+                        curDiff.append(i)
+                    }
+                }
+            } else {
+                if bound + 1 < q1.count {
+                    for i in bound..<q1.count {
+                        curDiff.append(i)
+                    }
+                }
+                if bound + 1 < q2.count {
+                    for i in bound..<q2.count {
+                        curDiff.append(i)
+                    }
+                }
+            }
+            diff.append(curDiff)
+            prevDiff = Set(curDiff)
+            idx += 1
+        }
+        return diff
+    }
+}
