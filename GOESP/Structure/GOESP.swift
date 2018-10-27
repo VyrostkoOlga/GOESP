@@ -167,16 +167,6 @@ extension GOESP {
                 curDiff.insert(i)
             }
         }
-        if queues[idx].count > border {
-            for i in border..<queues[idx].count {
-                curDiff.insert(i)
-            }
-        }
-        if other.queues[idx].count > border {
-            for i in border..<other.queues[idx].count {
-                curDiff.insert(i)
-            }
-        }
         idx += 1
         var diff = [curDiff]
 
@@ -200,17 +190,6 @@ extension GOESP {
             if q1.count == q2.count {
                 for i in bound..<q1.count {
                     if q1[i] != q2[i] || prevDiff.contains(where: { $0 == q1[i] * 2 || $0 == q2[i] * 2 + 1 }) {
-                        curDiff.insert(i)
-                    }
-                }
-            } else {
-                if bound + 1 < q1.count {
-                    for i in bound..<q1.count {
-                        curDiff.insert(i)
-                    }
-                }
-                if bound + 1 < q2.count {
-                    for i in bound..<q2.count {
                         curDiff.insert(i)
                     }
                 }

@@ -28,7 +28,7 @@ final class GOESPCompareTestCase: XCTestCase {
         let g1 = GOESP.build(str: "AACCCA")
         let g2 = GOESP.build(str: "AACACA")
         let diff = g1.findLevelsDiffUp(other: g2)
-        XCTAssertEqual([Set([3, 4, 5]), Set([1, 2]), Set([0])], diff)
+        XCTAssertEqual([Set([3]), Set([1, 2]), Set([0])], diff)
     }
 
     func testCompare4Mers() {
@@ -40,6 +40,10 @@ final class GOESPCompareTestCase: XCTestCase {
         g2 = GOESP.build(str: "TACA")
         diff = g1.findLevelsDiffUp(other: g2)
         XCTAssertEqual([Set([0]), Set([0]), Set([0])], diff)
+
+        g2 = GOESP.build(str: "TAAA")
+        diff = g1.findLevelsDiffUp(other: g2)
+        XCTAssertEqual([Set([0, 2]), Set([0, 1]), Set([0])], diff)
     }
 
 }
