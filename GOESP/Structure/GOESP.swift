@@ -224,3 +224,75 @@ extension GOESP: Equatable {
         return alph.firstIndex(of: grammar.alph[symbol])
     }
 }
+
+// MARK: - search v2
+extension GOESP {
+    func search(substring: String) {
+        var innerSubstring = [Int]()
+        for symb in substring {
+            guard let innerSymbol = alph.firstIndex(of: String(symb)) else {
+                // mismatch
+                return
+            }
+            innerSubstring.append(innerSymbol)
+        }
+        guard let firstSymbol = innerSubstring.first else {
+            // empty string - found
+            return
+        }
+        guard let firstQueue = queues.first else {
+            // empty tree - mismatch
+            return
+        }
+        var idx = 0
+        while idx < firstQueue.count {
+            if firstQueue[idx] == firstSymbol {
+                print(match(substr: innerSubstring, from: idx))
+            }
+            idx += 1
+        }
+    }
+
+    private func match(substr: [Int], from startPos: Int) -> Bool {
+        var currentPos = startPos
+        var currentLevel = 0
+        var idx = 0
+        while idx < substr.count {
+            // step 1: compare current
+            guard queues[currentLevel][currentPos] == substr[idx] else {
+                return false
+            }
+
+            // step 2: determine if current position is left node or
+            // right node of the rule
+            if currentPos & 1 == 0 {
+                // if left, move to right - move to next right
+                // item in current queue
+                if currentPos + 1 == queues[currentLevel].count {
+                    return false
+                }
+                currentPos += 1
+                idx += 1
+                continue
+            }
+
+            // if right, should move to next item in level up queue and then
+            // to its left child
+            currentLevel += 1
+            guard currentLevel < queues.count else {
+                // mismatch
+                return false
+            }
+            currentPos = (currentPos - 1) / 2
+            guard currentPos + 1 < queues[currentLevel].count else {
+                // mismatch
+                return false
+            }
+            currentPos = currentPos + 1
+            currentLevel -= 1
+            currentPos = currentPos * 2
+            idx += 1
+        }
+        return true
+    }
+}

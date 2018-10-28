@@ -11,6 +11,7 @@
 		C964DE90216A4A13002B39CD /* GOESP.swift in Sources */ = {isa = PBXBuildFile; fileRef = C964DE8F216A4A13002B39CD /* GOESP.swift */; };
 		C964DE91216A5155002B39CD /* GOESP.swift in Sources */ = {isa = PBXBuildFile; fileRef = C964DE8F216A4A13002B39CD /* GOESP.swift */; };
 		C964DE93216A5645002B39CD /* GOESPTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C964DE92216A5645002B39CD /* GOESPTestCase.swift */; };
+		C9BB07452185B0BE00030D55 /* GOESPSearchTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BB07442185B0BE00030D55 /* GOESPSearchTestCase.swift */; };
 		C9BE30B5218459AC00C27B5A /* GOESPCompareTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BE30B4218459AC00C27B5A /* GOESPCompareTestCase.swift */; };
 		C9EF19F2217C7C9A0042CB1D /* EmbedTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EF19F1217C7C9A0042CB1D /* EmbedTestCase.swift */; };
 		C9F8FCBA2171F48C00DEACF4 /* KMerTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9F8FCB92171F48C00DEACF4 /* KMerTestCase.swift */; };
@@ -38,6 +39,7 @@
 		C964DE8A216A49C2002B39CD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C964DE8F216A4A13002B39CD /* GOESP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GOESP.swift; sourceTree = "<group>"; };
 		C964DE92216A5645002B39CD /* GOESPTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GOESPTestCase.swift; sourceTree = "<group>"; };
+		C9BB07442185B0BE00030D55 /* GOESPSearchTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GOESPSearchTestCase.swift; sourceTree = "<group>"; };
 		C9BE30B4218459AC00C27B5A /* GOESPCompareTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GOESPCompareTestCase.swift; sourceTree = "<group>"; };
 		C9EF19F1217C7C9A0042CB1D /* EmbedTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedTestCase.swift; sourceTree = "<group>"; };
 		C9F8FCB92171F48C00DEACF4 /* KMerTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMerTestCase.swift; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 				C9F8FCBB2171F4CB00DEACF4 /* ChangesTestCase.swift */,
 				C9EF19F1217C7C9A0042CB1D /* EmbedTestCase.swift */,
 				C9BE30B4218459AC00C27B5A /* GOESPCompareTestCase.swift */,
+				C9BB07442185B0BE00030D55 /* GOESPSearchTestCase.swift */,
 			);
 			path = "GOESP-Tests";
 			sourceTree = "<group>";
@@ -214,6 +217,7 @@
 				C964DE93216A5645002B39CD /* GOESPTestCase.swift in Sources */,
 				C9F8FCBC2171F4CB00DEACF4 /* ChangesTestCase.swift in Sources */,
 				C9F8FCBF2171F82900DEACF4 /* StringExtension.swift in Sources */,
+				C9BB07452185B0BE00030D55 /* GOESPSearchTestCase.swift in Sources */,
 				C9EF19F2217C7C9A0042CB1D /* EmbedTestCase.swift in Sources */,
 				C964DE91216A5155002B39CD /* GOESP.swift in Sources */,
 				C9F8FCBA2171F48C00DEACF4 /* KMerTestCase.swift in Sources */,
