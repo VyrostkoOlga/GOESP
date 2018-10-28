@@ -8,6 +8,11 @@
 
 import XCTest
 
+/**
+ Problem: should move not from the beginning of
+ first queue to its end, but using tree symbols
+ */
+
 final class GOESPSearchTestCase: XCTestCase {
     func testSearch2Mer() {
         grammar.search(substring: "AA")
