@@ -15,9 +15,8 @@ import XCTest
 
 final class GOESPSearchTestCase: XCTestCase {
     func testSearch2Mer() {
-        grammar.search(substring: "AA")
-        grammar.search(substring: "ACA")
+        print(grammar.searchDeep(substring: "CA"))
     }
 }
 
-private let grammar = GOESP.build(str: "AACACAAAC")
+private let grammar = GOESP.build(str: "AACAABAAA")

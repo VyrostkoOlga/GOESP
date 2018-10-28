@@ -296,3 +296,95 @@ extension GOESP {
         return true
     }
 }
+
+// MARK: - search v3
+extension GOESP {
+    private final class Match: Equatable, Hashable, CustomDebugStringConvertible {
+        let position: Int
+        var idx: Int
+
+        init(position: Int) {
+            self.position = position
+            self.idx = 0
+        }
+
+        static func ==(lhs: Match, rhs: Match) -> Bool {
+            return lhs.position == rhs.position
+        }
+
+        var hashValue: Int {
+            return position
+        }
+
+        var debugDescription: String {
+            return "\(position) \(idx)"
+        }
+    }
+    func searchDeep(substring: String) -> [Int] {
+        var innerSubstring = [Int]()
+        for symb in substring {
+            guard let innerSymbol = alph.firstIndex(of: String(symb)) else {
+                // mismatch
+                return []
+            }
+            innerSubstring.append(innerSymbol)
+        }
+
+        // start with the most deep, the most left
+        var currentPos = 0
+        var currentLevel = 0
+        var foundMatches = [Int]()
+        var matches = [Match]()
+        var idx = 0
+        while true {
+            // step 1: check if still matches
+            var toRemove = Set<Match>()
+            let currentSymbol = queues[currentLevel][currentPos]
+            matches.forEach {
+                if $0.idx == substring.count - 1{
+                    // match
+                    foundMatches.append($0.position)
+                    toRemove.insert($0)
+                } else if currentSymbol != innerSubstring[$0.idx] {
+                    toRemove.insert($0)
+                } else {
+                    $0.idx += 1
+                }
+            }
+            matches.removeAll(where: { toRemove.contains($0) })
+
+            // step 2: check if current symbol is a start of a new match
+            if innerSubstring[0] == currentSymbol {
+                matches.append(Match(position: idx))
+            }
+            idx += 1
+
+            // step 3: move
+            // if current position is even, should move to
+            // the next right node in current queue (right sibling of
+            // current node)
+            if currentPos & 1 == 0 {
+                // move right
+                if currentPos + 1 >= queues[currentLevel].count {
+                    break
+                }
+                currentPos += 1
+                continue
+            }
+
+            while currentPos & 1 == 1 {
+                if currentLevel + 1 >= queues.count {
+                    break
+                }
+                currentLevel += 1
+                currentPos = (currentPos - 1) >> 1
+            }
+            currentPos += 1
+            while currentLevel > 0 {
+                currentPos <<= 1
+                currentLevel -= 1
+            }
+        }
+        return foundMatches + matches.compactMap { $0.idx == substring.count - 1 ? $0.position : nil }
+    }
+}
