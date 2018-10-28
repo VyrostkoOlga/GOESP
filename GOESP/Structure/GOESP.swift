@@ -155,7 +155,13 @@ extension GOESP {
 
 // MARK: - compare
 
-extension GOESP {
+extension GOESP: Equatable {
+    static func == (lhs: GOESP, rhs: GOESP) -> Bool {
+        let diff = lhs.findLevelsDiffUp(other: rhs)
+        let notEmptyDiff = nil != diff.first(where: { !$0.isEmpty })
+        return lhs.queues.count == rhs.queues.count && !notEmptyDiff
+    }
+
     /**
      Iterate on levels and find differences for each level
      For example:
@@ -177,7 +183,8 @@ extension GOESP {
         var diff = [curDiff]
 
         var prevDiff = curDiff
-        while idx < queues.count {
+        let minNumberOfQueues = min(queues.count, other.queues.count)
+        while idx < minNumberOfQueues {
             let q1 = queues[idx]
             let q2 = other.queues[idx]
             let border = min(q1.count, q2.count) / 2

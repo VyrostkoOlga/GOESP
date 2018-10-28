@@ -57,7 +57,7 @@ final class GOESPTestCase: XCTestCase {
             str.append(alph[rand])
             grammar.append(symbol: alph[rand])
             print("\(count) -> \(grammar.count)")
-            print(Double(grammar.count) / count)
+            print(Double(grammar.count) / Double(count))
             XCTAssertEqual(str, grammar.product())
         }
     }
