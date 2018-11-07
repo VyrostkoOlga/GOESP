@@ -8,15 +8,17 @@
 
 import XCTest
 
-/**
- Problem: should move not from the beginning of
- first queue to its end, but using tree symbols
- */
-
 final class GOESPSearchTestCase: XCTestCase {
     func testSearch2Mer() {
-        print(grammar.searchDeep(substring: "CA"))
+        XCTAssertEqual([0, 1, 4], grammar.searchDeep2(substring: "AA"))
+        XCTAssertEqual([2], grammar.searchDeep2(substring: "AC"))
+        XCTAssertEqual([5], grammar.searchDeep2(substring: "AB"))
+        XCTAssertEqual([6], grammar.searchDeep2(substring: "BA"))
+
+        XCTAssertEqual([0, 2, 5, 9, 11, 13, 15], grammar2.searchDeep2(substring: "CA"))
+        
     }
 }
 
-private let grammar = GOESP.build(str: "AACAABAAA")
+private let grammar = GOESP.build(str: "AAACAABA")
+private let grammar2 = GOESP.build(str: "CACABACABACACACACA")

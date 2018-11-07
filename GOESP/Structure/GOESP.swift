@@ -9,7 +9,7 @@
 import Foundation
 
 final class GOESP {
-    struct StackElement: Equatable {
+    struct StackElement: Equatable, Hashable {
         typealias This = StackElement
 
         let symbol: Int
@@ -17,6 +17,10 @@ final class GOESP {
 
         static func == (lhs: This, rhs: This) -> Bool {
             return lhs.symbol == rhs.symbol && lhs.level == rhs.level
+        }
+
+        var hashValue: Int {
+            return symbol << level
         }
     }
 
@@ -320,6 +324,7 @@ extension GOESP {
             return "\(position) \(idx)"
         }
     }
+
     func searchDeep(substring: String) -> [Int] {
         var innerSubstring = [Int]()
         for symb in substring {
@@ -336,28 +341,31 @@ extension GOESP {
         var foundMatches = [Int]()
         var matches = [Match]()
         var idx = 0
+        var path = [StackElement]()
         while true {
             // step 1: check if still matches
             var toRemove = Set<Match>()
             let currentSymbol = queues[currentLevel][currentPos]
-            matches.forEach {
-                if $0.idx == substring.count - 1{
-                    // match
-                    foundMatches.append($0.position)
-                    toRemove.insert($0)
-                } else if currentSymbol != innerSubstring[$0.idx] {
-                    toRemove.insert($0)
-                } else {
-                    $0.idx += 1
+            if currentLevel == 0 {
+                matches.forEach {
+                    if $0.idx == substring.count - 1 {
+                        // match
+                        foundMatches.append($0.position)
+                        toRemove.insert($0)
+                    } else if currentSymbol != innerSubstring[$0.idx + 1] {
+                        toRemove.insert($0)
+                    } else {
+                        $0.idx += 1
+                    }
                 }
-            }
-            matches.removeAll(where: { toRemove.contains($0) })
+                matches.removeAll(where: { toRemove.contains($0) })
 
-            // step 2: check if current symbol is a start of a new match
-            if innerSubstring[0] == currentSymbol {
-                matches.append(Match(position: idx))
+                // step 2: check if current symbol is a start of a new match
+                if innerSubstring[0] == currentSymbol {
+                    matches.append(Match(position: idx))
+                }
+                idx += 1
             }
-            idx += 1
 
             // step 3: move
             // if current position is even, should move to
@@ -369,6 +377,14 @@ extension GOESP {
                     break
                 }
                 currentPos += 1
+                print("Move to \(currentLevel) \(currentPos)")
+                continue
+            }
+
+            if let pathElement = path.popLast() {
+                currentPos = pathElement.symbol
+                currentLevel = pathElement.level
+                print("Move to \(currentLevel) \(currentPos)")
                 continue
             }
 
@@ -378,13 +394,97 @@ extension GOESP {
                 }
                 currentLevel += 1
                 currentPos = (currentPos - 1) >> 1
+                print("Move to \(currentLevel) \(currentPos)")
             }
             currentPos += 1
             while currentLevel > 0 {
-                currentPos <<= 1
+                let currentParent = queues[currentLevel][currentPos]
+                path.append(StackElement(symbol: currentPos, level: currentLevel))
+                currentPos = queues[currentLevel].firstIndex(of: currentParent)! << 1
                 currentLevel -= 1
             }
+            print("Move to \(currentLevel) \(currentPos)")
         }
         return foundMatches + matches.compactMap { $0.idx == substring.count - 1 ? $0.position : nil }
+    }
+
+    func searchDeep2(substring: String) -> [Int] {
+        // map to internal symbols
+        var innerSubstring = [Int]()
+        for symb in substring {
+            guard let innerSymbol = alph.firstIndex(of: String(symb)) else {
+                // mismatch
+                return []
+            }
+            innerSubstring.append(innerSymbol)
+        }
+
+        var foundMatches = [Int]()
+        var matches = [Match]()
+        var visited = Set<StackElement>()
+        var stack = [StackElement(symbol: 0, level: 0)] // start with the most left, the lowest
+        var idx = 0
+
+        while !stack.isEmpty {
+            let current = stack.popLast()!
+            print("Move to \(current)")
+            visited.insert(current)
+            let currentSymbol = queues[current.level][current.symbol]
+
+            // step 1: when travel throught the lowest level,
+            // check for all matches if still matches
+            if current.level == 0 {
+                var toRemove = Set<Match>()
+                matches.forEach {
+                    if $0.idx == substring.count - 1 {
+                        // match
+                        foundMatches.append($0.position)
+                        toRemove.insert($0)
+                    } else if currentSymbol != innerSubstring[$0.idx + 1] {
+                        // mismatch, this match should be removed
+                        toRemove.insert($0)
+                    } else {
+                        // still match, increase number of matching symbols
+                        $0.idx += 1
+                    }
+                }
+                matches.removeAll(where: { toRemove.contains($0) })
+
+                // step 2: check if current symbol is a start of a new match
+                if innerSubstring[0] == currentSymbol {
+                    matches.append(Match(position: idx))
+                }
+                idx += 1
+            }
+
+            // step 3: moving
+            if current.level > 0 {
+                // if could move to left child, move down
+                let childNode = StackElement(symbol: current.symbol << 1, level: current.level - 1)
+                if !visited.contains(childNode) {
+                    visited.insert(childNode)
+                    stack.append(current)
+                    stack.append(StackElement(symbol: currentSymbol << 1, level: current.level - 1))
+                    continue
+                }
+            }
+
+            if current.symbol & 1 == 0, queues[current.level].count > current.symbol + 1 {
+                // if could move to right sibling, move right
+                let rightNode = StackElement(symbol: current.symbol + 1, level: current.level)
+                stack.append(rightNode)
+                continue
+            }
+
+            if current.level < queues.count - 1 {
+                let parentNode = StackElement(symbol: current.symbol >> 1, level: current.level + 1)
+                if !visited.contains(parentNode) {
+                    stack.append(parentNode)
+                }
+            }
+        }
+
+        foundMatches.append(contentsOf: matches.compactMap { $0.idx == innerSubstring.count - 1 ? $0.position : nil })
+        return foundMatches
     }
 }
