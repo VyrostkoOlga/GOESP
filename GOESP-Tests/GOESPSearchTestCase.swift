@@ -25,6 +25,35 @@ final class GOESPSearchTestCase: XCTestCase {
 
         XCTAssertEqual([0, 5, 7], grammar2.searchDeep2(substring: "CAC"))
     }
+
+    func testSearchEqual() {
+        XCTAssertEqual([0], grammar2.searchDeep2(substring: "CACABCACACA"))
+    }
+
+    func testSearchOnRandomStrings() {
+        let alph = ["A", "C"]
+        let grammar = GOESP()
+        var str = ""
+        for _ in 0..<150 {
+            let randIdx = Int(arc4random_uniform(UInt32(UInt(alph.count))))
+            grammar.append(symbol: alph[randIdx])
+            str.append(alph[randIdx])
+
+            let substr = "AAC"
+            if str.indicesOf(string: substr) != grammar.searchDeep2(substring: substr) {
+                print(str)
+            }
+        }
+    }
+
+    func testString() {
+        let str = "ACCACACCAACC"
+        let grammar = GOESP.build(str: str)
+        XCTAssertEqual(str, grammar.product())
+        print(grammar.searchDeep2(substring: "AAC"))
+        print(str.indicesOf(string: "AAC"))
+
+    }
 }
 
 private let grammar = GOESP.build(str: "AAACAABA")

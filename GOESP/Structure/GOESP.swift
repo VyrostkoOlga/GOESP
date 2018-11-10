@@ -429,6 +429,7 @@ extension GOESP {
             let current = stack.popLast()!
             print("Move to \(current)")
             visited.insert(current)
+
             let currentSymbol = queues[current.level][current.symbol]
 
             // step 1: when travel throught the lowest level,
@@ -484,7 +485,7 @@ extension GOESP {
 
             if current.level < queues.count - 1 {
                 let parentNode = StackElement(symbol: current.symbol >> 1, level: current.level + 1)
-                if !visited.contains(parentNode) {
+                if !visited.contains(parentNode), parentNode.symbol < queues[parentNode.level].count - 1 {
                     stack.append(parentNode)
                 }
             }
