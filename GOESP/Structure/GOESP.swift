@@ -467,6 +467,12 @@ extension GOESP {
                     stack.append(StackElement(symbol: currentSymbol << 1, level: current.level - 1))
                     continue
                 }
+                // the most right
+                if current.symbol == queues[current.level].count - 1, queues[current.level - 1].count & 1 == 1 {
+                    // should check trailing child node
+                    stack.append(StackElement(symbol: queues[current.level - 1].count - 1, level: current.level - 1))
+                    continue
+                }
             }
 
             if current.symbol & 1 == 0, queues[current.level].count > current.symbol + 1 {

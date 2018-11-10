@@ -15,10 +15,10 @@ final class GOESPSearchTestCase: XCTestCase {
         XCTAssertEqual([5], grammar.searchDeep2(substring: "AB"))
         XCTAssertEqual([6], grammar.searchDeep2(substring: "BA"))
 
-        XCTAssertEqual([0, 2, 5, 9, 11, 13, 15], grammar2.searchDeep2(substring: "CA"))
+        XCTAssertEqual([0, 2, 5, 7, 9], grammar2.searchDeep2(substring: "CA"))
         
     }
 }
 
 private let grammar = GOESP.build(str: "AAACAABA")
-private let grammar2 = GOESP.build(str: "CACABACABACACACACA")
+private let grammar2 = GOESP.build(str: "CACABCACACA")
