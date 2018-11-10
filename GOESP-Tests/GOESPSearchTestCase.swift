@@ -18,6 +18,13 @@ final class GOESPSearchTestCase: XCTestCase {
         XCTAssertEqual([0, 2, 5, 7, 9], grammar2.searchDeep2(substring: "CA"))
         
     }
+
+    func testSearch3Mer() {
+        XCTAssertEqual([3], grammar.searchDeep2(substring: "CAA"))
+        XCTAssertEqual([5], grammar.searchDeep2(substring: "ABA"))
+
+        XCTAssertEqual([0, 5, 7], grammar2.searchDeep2(substring: "CAC"))
+    }
 }
 
 private let grammar = GOESP.build(str: "AAACAABA")
