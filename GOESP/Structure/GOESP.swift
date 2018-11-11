@@ -41,11 +41,11 @@ final class GOESP {
         let pos: Int        // real position in queue
 
         static func == (lhs: This, rhs: This) -> Bool {
-            return lhs.symbol == rhs.symbol && lhs.level == rhs.level
+            return lhs.pos == rhs.pos && lhs.level == rhs.level
         }
 
         var hashValue: Int {
-            return symbol << level
+            return pos << level
         }
     }
 
