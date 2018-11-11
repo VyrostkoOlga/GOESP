@@ -8,6 +8,11 @@
 
 import XCTest
 
+/*
+ Problems:
+ ACCAACCCACACAACCCCACCCACCAA
+ */
+
 final class GOESPSearchTestCase: XCTestCase {
     func testSearch2Mer() {
         XCTAssertEqual([0, 1, 4], grammar.searchDeep2(substring: "AA", nodeSelectHandler: nodeDidSelect(level:symbol:)))
@@ -31,10 +36,10 @@ final class GOESPSearchTestCase: XCTestCase {
     }
 
     func testSearchOnRandomStrings() {
-        let alph = ["A"]
+        let alph = ["A", "C"]
         let grammar = GOESP()
         var str = ""
-        for _ in 0..<150 {
+        for _ in 0..<50 {
             let randIdx = Int(arc4random_uniform(UInt32(UInt(alph.count))))
             grammar.append(symbol: alph[randIdx])
             str.append(alph[randIdx])
@@ -67,8 +72,15 @@ final class GOESPSearchTestCase: XCTestCase {
         XCTAssertEqual(str.indicesOf(string: "AA"), grammar.searchDeep2(substring: "AA", nodeSelectHandler: nodeDidSelect(level:symbol:)))
     }
 
+    func testRepetitionString4() {
+        let str = "CCAAAACCCCACCCACA"
+        let grammar = GOESP.build(str: str)
+        XCTAssertEqual(str, grammar.product())
+        XCTAssertEqual(str.indicesOf(string: "AA"), grammar.searchDeep2(substring: "AA", nodeSelectHandler: nodeDidSelect(level:symbol:)))
+    }
+
     func nodeDidSelect(level: Int, symbol: Int) {
-        print("Move to \(level), \(symbol)")
+        //print("Move to \(level), \(symbol)")
     }
 }
 

@@ -487,7 +487,7 @@ extension GOESP {
             if current.level > 0 {
                 // if could move to left child, move down
                 let childNode = Node(symbol: currentSymbol << 1, level: current.level - 1, pos: current.pos << 1)
-                if !visited.contains(childNode), childNode.symbol + 1 < queues[childNode.level].count {
+                if !visited.contains(childNode) {
                     visited.insert(childNode)
                     stack.append(current)
                     stack.append(childNode)
@@ -497,7 +497,7 @@ extension GOESP {
                 if current.symbol == queues[current.level].count - 1, queues[current.level - 1].count & 1 == 1 {
                     // should check trailing child node
                     let symbol = queues[current.level - 1].count - 1
-                    let theMostRight = Node(symbol: symbol, level: current.level - 1, pos: symbol)
+                    let theMostRight = Node(symbol: symbol, level: current.level - 1, pos: (queues[current.level].count - 1) << 1 + 2)
                     if !visited.contains(theMostRight) {
                         visited.insert(theMostRight)
                         stack.append(current)
