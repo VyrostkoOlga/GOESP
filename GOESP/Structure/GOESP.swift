@@ -428,6 +428,7 @@ extension GOESP {
         while !stack.isEmpty {
             let current = stack.popLast()!
             nodeSelectHandler(current.level, current.symbol)
+            var isCurrentVisisted = visited.contains(current)
             visited.insert(current)
 
             let currentSymbol = queues[current.level][current.symbol]
@@ -462,7 +463,7 @@ extension GOESP {
             if current.level > 0 {
                 // if could move to left child, move down
                 let childNode = StackElement(symbol: current.symbol << 1, level: current.level - 1)
-                if !visited.contains(childNode) {
+                if !visited.contains(childNode) || !isCurrentVisisted {
                     visited.insert(childNode)
                     stack.append(current)
                     stack.append(StackElement(symbol: currentSymbol << 1, level: current.level - 1))
