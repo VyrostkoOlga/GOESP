@@ -24,6 +24,31 @@ final class GOESP {
         }
     }
 
+    struct Node: Equatable, Hashable {
+        typealias This = Node
+
+        /*
+         Example:
+         0
+         000
+         00
+         01
+         For the left child of 0 in the third place in the third queue, coordinates
+         will be symbol = 0, level = 1, pos = 4
+        */
+        let symbol: Int     // position of symbol in queue
+        let level: Int      // level of the queue
+        let pos: Int        // real position in queue
+
+        static func == (lhs: This, rhs: This) -> Bool {
+            return lhs.symbol == rhs.symbol && lhs.level == rhs.level
+        }
+
+        var hashValue: Int {
+            return symbol << level
+        }
+    }
+
     private(set) var queues = [[Int]]()
     private(set) var alph = [String]()
 
@@ -421,14 +446,13 @@ extension GOESP {
 
         var foundMatches = [Int]()
         var matches = [Match]()
-        var visited = Set<StackElement>()
-        var stack = [StackElement(symbol: 0, level: 0)] // start with the most left, the lowest
+        var visited = Set<Node>()
+        var stack = [Node(symbol: 0, level: 0, pos: 0)] // start with the most left, the lowest
         var idx = 0
 
         while !stack.isEmpty {
             let current = stack.popLast()!
             nodeSelectHandler(current.level, current.symbol)
-            var isCurrentVisisted = visited.contains(current)
             visited.insert(current)
 
             let currentSymbol = queues[current.level][current.symbol]
@@ -462,30 +486,34 @@ extension GOESP {
             // step 3: moving
             if current.level > 0 {
                 // if could move to left child, move down
-                let childNode = StackElement(symbol: current.symbol << 1, level: current.level - 1)
+                let childNode = Node(symbol: currentSymbol << 1, level: current.level - 1, pos: current.pos << 1)
                 if !visited.contains(childNode) {
                     visited.insert(childNode)
                     stack.append(current)
-                    stack.append(StackElement(symbol: currentSymbol << 1, level: current.level - 1))
+                    stack.append(childNode)
                     continue
                 }
                 // the most right
                 if current.symbol == queues[current.level].count - 1, queues[current.level - 1].count & 1 == 1 {
                     // should check trailing child node
-                    stack.append(StackElement(symbol: queues[current.level - 1].count - 1, level: current.level - 1))
+                    let symbol = queues[current.level - 1].count - 1
+                    stack.append(Node(symbol: symbol, level: current.level - 1, pos: symbol))
                     continue
                 }
             }
 
             if current.symbol & 1 == 0, queues[current.level].count > current.symbol + 1 {
                 // if could move to right sibling, move right
-                let rightNode = StackElement(symbol: current.symbol + 1, level: current.level)
+                let rightNode = Node(symbol: current.symbol + 1, level: current.level, pos: current.symbol + 1)
                 stack.append(rightNode)
                 continue
             }
 
             if current.level < queues.count - 1 {
-                let parentNode = StackElement(symbol: current.symbol >> 1, level: current.level + 1)
+                let parentSymbol = current.pos >> 1
+                let parentNode = Node(symbol: parentSymbol, level: current.level + 1, pos: parentSymbol)
+                //let parentSymbol = current.symbol >> 1
+                //let parentNode = Node(symbol: parentSymbol, level: current.level + 1, sign: queues[current.level + 1][currentSymbol >> 1])
                 if !visited.contains(parentNode), parentNode.symbol < queues[parentNode.level].count {
                     stack.append(parentNode)
                 }
