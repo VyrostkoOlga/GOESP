@@ -485,7 +485,7 @@ extension GOESP {
 
             if current.level < queues.count - 1 {
                 let parentNode = StackElement(symbol: current.symbol >> 1, level: current.level + 1)
-                if !visited.contains(parentNode), parentNode.symbol < queues[parentNode.level].count - 1 {
+                if !visited.contains(parentNode), parentNode.symbol < queues[parentNode.level].count {
                     stack.append(parentNode)
                 }
             }
