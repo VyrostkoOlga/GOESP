@@ -481,15 +481,13 @@ extension GOESP {
                     matches.append(Match(position: idx))
                 }
                 idx += 1
-                // ACCCCACCCCAAAAACCAAACCAAA
-                // 0111101111000001100011000
             }
 
             // step 3: moving
             if current.level > 0 {
                 // if could move to left child, move down
                 let childNode = Node(symbol: currentSymbol << 1, level: current.level - 1, pos: current.pos << 1)
-                if !visited.contains(childNode) {
+                if !visited.contains(childNode), childNode.symbol + 1 < queues[childNode.level].count {
                     visited.insert(childNode)
                     stack.append(current)
                     stack.append(childNode)
