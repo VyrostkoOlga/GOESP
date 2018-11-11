@@ -463,7 +463,7 @@ extension GOESP {
             if current.level > 0 {
                 // if could move to left child, move down
                 let childNode = StackElement(symbol: current.symbol << 1, level: current.level - 1)
-                if !visited.contains(childNode) || !isCurrentVisisted {
+                if !visited.contains(childNode) {
                     visited.insert(childNode)
                     stack.append(current)
                     stack.append(StackElement(symbol: currentSymbol << 1, level: current.level - 1))

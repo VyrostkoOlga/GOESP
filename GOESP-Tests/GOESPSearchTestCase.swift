@@ -47,11 +47,12 @@ final class GOESPSearchTestCase: XCTestCase {
     }
 
     func testString() {
-        let str = "ACCAACCCCACCAACAAAACAACA"
+        //let str = "ACCAACCCCACCAACAAAACAACA"
+        let str = "ACACACACACAC"
         let grammar = GOESP.build(str: str)
         XCTAssertEqual(str, grammar.product())
-        print(grammar.searchDeep2(substring: "AAC", nodeSelectHandler: nodeDidSelect(level:symbol:)))
-        print(str.indicesOf(string: "AAC"))
+        print(grammar.searchDeep2(substring: "AC", nodeSelectHandler: nodeDidSelect(level:symbol:)))
+        print(str.indicesOf(string: "AC"))
     }
 
     func nodeDidSelect(level: Int, symbol: Int) {
