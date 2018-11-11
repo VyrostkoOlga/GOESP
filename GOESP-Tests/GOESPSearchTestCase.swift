@@ -31,7 +31,7 @@ final class GOESPSearchTestCase: XCTestCase {
     }
 
     func testSearchOnRandomStrings() {
-        let alph = ["A", "C"]
+        let alph = ["A"]
         let grammar = GOESP()
         var str = ""
         for _ in 0..<150 {
@@ -39,24 +39,36 @@ final class GOESPSearchTestCase: XCTestCase {
             grammar.append(symbol: alph[randIdx])
             str.append(alph[randIdx])
 
-            let substr = "AAC"
+            let substr = "AA"
             if str.indicesOf(string: substr) != grammar.searchDeep2(substring: substr, nodeSelectHandler: nodeDidSelect(level:symbol:)) {
                 print(str)
             }
         }
     }
 
-    func testString() {
-        //let str = "ACCAACCCCACCAACAAAACAACA"
+    func testRepetitionString() {
         let str = "ACACACACACAC"
         let grammar = GOESP.build(str: str)
         XCTAssertEqual(str, grammar.product())
-        print(grammar.searchDeep2(substring: "AC", nodeSelectHandler: nodeDidSelect(level:symbol:)))
-        print(str.indicesOf(string: "AC"))
+        XCTAssertEqual(str.indicesOf(string: "AC"), grammar.searchDeep2(substring: "AC", nodeSelectHandler: nodeDidSelect(level:symbol:)))
+    }
+
+    func testRepetitionString2() {
+        let str = "ACCCCACCCCAAAAACCAAACCAAA"
+        let grammar = GOESP.build(str: str)
+        XCTAssertEqual(str, grammar.product())
+        XCTAssertEqual(str.indicesOf(string: "AAC"), grammar.searchDeep2(substring: "AAC", nodeSelectHandler: nodeDidSelect(level:symbol:)))
+    }
+
+    func testRepetitionString3() {
+        let str = "AAAAA"
+        let grammar = GOESP.build(str: str)
+        XCTAssertEqual(str, grammar.product())
+        XCTAssertEqual(str.indicesOf(string: "AA"), grammar.searchDeep2(substring: "AA", nodeSelectHandler: nodeDidSelect(level:symbol:)))
     }
 
     func nodeDidSelect(level: Int, symbol: Int) {
-        //print("Move to \(level), \(symbol)")
+        print("Move to \(level), \(symbol)")
     }
 }
 

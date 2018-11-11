@@ -30,7 +30,7 @@ extension String {
         {
             let index = distance(from: self.startIndex, to: range.lowerBound)
             indices.append(index)
-            searchStartIndex = range.upperBound
+            searchStartIndex = self.index(range.lowerBound, offsetBy: 1)
         }
 
         return indices

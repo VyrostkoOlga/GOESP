@@ -481,6 +481,8 @@ extension GOESP {
                     matches.append(Match(position: idx))
                 }
                 idx += 1
+                // ACCCCACCCCAAAAACCAAACCAAA
+                // 0111101111000001100011000
             }
 
             // step 3: moving
@@ -497,14 +499,19 @@ extension GOESP {
                 if current.symbol == queues[current.level].count - 1, queues[current.level - 1].count & 1 == 1 {
                     // should check trailing child node
                     let symbol = queues[current.level - 1].count - 1
-                    stack.append(Node(symbol: symbol, level: current.level - 1, pos: symbol))
-                    continue
+                    let theMostRight = Node(symbol: symbol, level: current.level - 1, pos: symbol)
+                    if !visited.contains(theMostRight) {
+                        visited.insert(theMostRight)
+                        stack.append(current)
+                        stack.append(theMostRight)
+                        continue
+                    }
                 }
             }
 
             if current.symbol & 1 == 0, queues[current.level].count > current.symbol + 1 {
                 // if could move to right sibling, move right
-                let rightNode = Node(symbol: current.symbol + 1, level: current.level, pos: current.symbol + 1)
+                let rightNode = Node(symbol: current.symbol + 1, level: current.level, pos: current.pos + 1)
                 stack.append(rightNode)
                 continue
             }
@@ -512,8 +519,6 @@ extension GOESP {
             if current.level < queues.count - 1 {
                 let parentSymbol = current.pos >> 1
                 let parentNode = Node(symbol: parentSymbol, level: current.level + 1, pos: parentSymbol)
-                //let parentSymbol = current.symbol >> 1
-                //let parentNode = Node(symbol: parentSymbol, level: current.level + 1, sign: queues[current.level + 1][currentSymbol >> 1])
                 if !visited.contains(parentNode), parentNode.symbol < queues[parentNode.level].count {
                     stack.append(parentNode)
                 }
