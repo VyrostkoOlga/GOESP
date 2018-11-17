@@ -331,10 +331,12 @@ extension GOESP {
     private final class Match: Equatable, Hashable, CustomDebugStringConvertible {
         let position: Int
         var idx: Int
+        var distance: Int
 
         init(position: Int) {
             self.position = position
             self.idx = 0
+            self.distance = 0
         }
 
         static func ==(lhs: Match, rhs: Match) -> Bool {
@@ -433,7 +435,7 @@ extension GOESP {
         return foundMatches + matches.compactMap { $0.idx == substring.count - 1 ? $0.position : nil }
     }
 
-    func searchDeep2(substring: String, nodeSelectHandler: (Int, Int) -> Void) -> [Int] {
+    func searchDeep2(substring: String, distance: Int = 0, nodeSelectHandler: (Int, Int) -> Void) -> [Int] {
         // map to internal symbols
         var innerSubstring = [Int]()
         for symb in substring {
@@ -467,8 +469,14 @@ extension GOESP {
                         foundMatches.append($0.position)
                         toRemove.insert($0)
                     } else if currentSymbol != innerSubstring[$0.idx + 1] {
-                        // mismatch, this match should be removed
-                        toRemove.insert($0)
+                        // distance should be increased
+                        $0.distance += 1
+                        $0.idx += 1
+                        // if distance from pattern is greater than desired
+                        // mismatch, should be removed
+                        if $0.distance > distance {
+                            toRemove.insert($0)
+                        }
                     } else {
                         // still match, increase number of matching symbols
                         $0.idx += 1
@@ -479,6 +487,10 @@ extension GOESP {
                 // step 2: check if current symbol is a start of a new match
                 if innerSubstring[0] == currentSymbol {
                     matches.append(Match(position: idx))
+                } else if distance > 0 {
+                    let match = Match(position: idx)
+                    match.distance = 1
+                    matches.append(match)
                 }
                 idx += 1
             }
@@ -536,8 +548,14 @@ extension GOESP {
                     foundMatches.append($0.position)
                     toRemove.insert($0)
                 } else if symbol != innerSubstring[$0.idx + 1] {
-                    // mismatch, this match should be removed
-                    toRemove.insert($0)
+                    // distance should be increased
+                    $0.distance += 1
+                    $0.idx += 1
+                    // if distance from pattern is greater than desired
+                    // mismatch, should be removed
+                    if $0.distance > distance {
+                        toRemove.insert($0)
+                    }
                 } else {
                     // still match, increase number of matching symbols
                     $0.idx += 1
@@ -548,6 +566,10 @@ extension GOESP {
             // new match
             if symbol == innerSubstring[0] {
                 matches.append(Match(position: idx))
+            } else if distance > 0 {
+                let match = Match(position: idx)
+                match.distance = 1
+                matches.append(match)
             }
             idx += 1
         }

@@ -34,12 +34,12 @@ final class GOESPSearchTestCase: XCTestCase {
         let alph = ["A", "C", "G", "T"]
         let grammar = GOESP()
         var str = ""
-        for _ in 0..<500 {
+        for _ in 0..<5000 {
             let randIdx = Int(arc4random_uniform(UInt32(UInt(alph.count))))
             grammar.append(symbol: alph[randIdx])
             str.append(alph[randIdx])
 
-            let substr = "AA"
+            let substr = "AC"
             XCTAssertEqual(str.indicesOf(string: substr), grammar.searchDeep2(substring: substr, nodeSelectHandler: nodeDidSelect(level:symbol:)))
         }
     }
