@@ -493,18 +493,6 @@ extension GOESP {
                     stack.append(childNode)
                     continue
                 }
-                // the most right
-                if current.symbol == queues[current.level].count - 1, queues[current.level - 1].count & 1 == 1 {
-                    // should check trailing child node
-                    let symbol = queues[current.level - 1].count - 1
-                    let theMostRight = Node(symbol: symbol, level: current.level - 1, pos: (queues[current.level].count - 1) << 1 + 2)
-                    if !visited.contains(theMostRight) {
-                        visited.insert(theMostRight)
-                        stack.append(current)
-                        stack.append(theMostRight)
-                        continue
-                    }
-                }
             }
 
             if current.symbol & 1 == 0, queues[current.level].count > current.symbol + 1 {
@@ -521,6 +509,47 @@ extension GOESP {
                     stack.append(parentNode)
                 }
             }
+        }
+
+        // the most right
+        var queueIdx = queues.count - 2
+        var currentLevel = [Int]()
+        var nextLevel = [Int]()
+        while queueIdx >= 0 {
+            nextLevel = []
+            currentLevel.forEach {
+                nextLevel.append(queues[queueIdx][$0 << 1])
+                nextLevel.append(queues[queueIdx][$0 << 1 + 1])
+            }
+            // extra symbol
+            if queues[queueIdx].count & 1 == 1 {
+                nextLevel.append(queues[queueIdx].last!)
+            }
+            currentLevel = nextLevel
+            queueIdx -= 1
+        }
+        for symbol in currentLevel {
+            var toRemove = Set<Match>()
+            matches.forEach {
+                if $0.idx == substring.count - 1 {
+                    // match
+                    foundMatches.append($0.position)
+                    toRemove.insert($0)
+                } else if symbol != innerSubstring[$0.idx + 1] {
+                    // mismatch, this match should be removed
+                    toRemove.insert($0)
+                } else {
+                    // still match, increase number of matching symbols
+                    $0.idx += 1
+                }
+            }
+            matches.removeAll(where: { toRemove.contains($0) })
+
+            // new match
+            if symbol == innerSubstring[0] {
+                matches.append(Match(position: idx))
+            }
+            idx += 1
         }
 
         foundMatches.append(contentsOf: matches.compactMap { $0.idx == innerSubstring.count - 1 ? $0.position : nil })

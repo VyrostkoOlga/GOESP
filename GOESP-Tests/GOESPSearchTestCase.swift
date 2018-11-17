@@ -8,11 +8,6 @@
 
 import XCTest
 
-/*
- Problems:
- ACCAACCCACACAACCCCACCCACCAA
- */
-
 final class GOESPSearchTestCase: XCTestCase {
     func testSearch2Mer() {
         XCTAssertEqual([0, 1, 4], grammar.searchDeep2(substring: "AA", nodeSelectHandler: nodeDidSelect(level:symbol:)))
@@ -36,18 +31,16 @@ final class GOESPSearchTestCase: XCTestCase {
     }
 
     func testSearchOnRandomStrings() {
-        let alph = ["A", "C"]
+        let alph = ["A", "C", "G", "T"]
         let grammar = GOESP()
         var str = ""
-        for _ in 0..<50 {
+        for _ in 0..<500 {
             let randIdx = Int(arc4random_uniform(UInt32(UInt(alph.count))))
             grammar.append(symbol: alph[randIdx])
             str.append(alph[randIdx])
 
             let substr = "AA"
-            if str.indicesOf(string: substr) != grammar.searchDeep2(substring: substr, nodeSelectHandler: nodeDidSelect(level:symbol:)) {
-                print(str)
-            }
+            XCTAssertEqual(str.indicesOf(string: substr), grammar.searchDeep2(substring: substr, nodeSelectHandler: nodeDidSelect(level:symbol:)))
         }
     }
 
