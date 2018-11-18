@@ -434,8 +434,10 @@ extension GOESP {
         }
         return foundMatches + matches.compactMap { $0.idx == substring.count - 1 ? $0.position : nil }
     }
+}
 
-    func searchDeep2(substring: String, distance: Int = 0, nodeSelectHandler: (Int, Int) -> Void) -> [Int] {
+extension GOESP {
+    func search(substring: String, distance: Int = 0, nodeSelectHandler: (Int, Int) -> Void) -> [Int] {
         // map to internal symbols
         var innerSubstring = [Int]()
         for symb in substring {
@@ -448,6 +450,53 @@ extension GOESP {
 
         var foundMatches = [Int]()
         var matches = [Match]()
+        searchDeep2(action: { (symbol, idx) in
+            var toRemove = Set<Match>()
+            matches.forEach {
+                if $0.idx == substring.count - 1 {
+                    // match
+                    foundMatches.append($0.position)
+                    toRemove.insert($0)
+                } else if symbol != innerSubstring[$0.idx + 1] {
+                    // distance should be increased
+                    $0.distance += 1
+                    $0.idx += 1
+                    // if distance from pattern is greater than desired
+                    // mismatch, should be removed
+                    if $0.distance > distance {
+                        toRemove.insert($0)
+                    }
+                } else {
+                    // still match, increase number of matching symbols
+                    $0.idx += 1
+                }
+            }
+            matches.removeAll(where: { toRemove.contains($0) })
+
+            // step 2: check if current symbol is a start of a new match
+            if innerSubstring[0] == symbol {
+                matches.append(Match(position: idx))
+            } else if distance > 0 {
+                let match = Match(position: idx)
+                match.distance = 1
+                matches.append(match)
+            }
+        }, nodeSelectHandler: nodeSelectHandler)
+        foundMatches.append(contentsOf: matches.compactMap { $0.idx == innerSubstring.count - 1 ? $0.position : nil })
+        return foundMatches
+    }
+
+    func countSymbols(nodeSelectionHandler: (Int, Int) -> Void) -> [Int] {
+        var alphCount = alph.map { _ in 0 }
+        searchDeep2(action: { (symbol, _) in
+            alphCount[symbol] += 1
+        }, nodeSelectHandler: nodeSelectionHandler)
+        return alphCount
+    }
+}
+
+private extension GOESP {
+    func searchDeep2(action: (Int, Int) -> Void, nodeSelectHandler: (Int, Int) -> Void) {
         var visited = Set<Node>()
         var stack = [Node(symbol: 0, level: 0, pos: 0)] // start with the most left, the lowest
         var idx = 0
@@ -462,36 +511,7 @@ extension GOESP {
             // step 1: when travel throught the lowest level,
             // check for all matches if still matches
             if current.level == 0 {
-                var toRemove = Set<Match>()
-                matches.forEach {
-                    if $0.idx == substring.count - 1 {
-                        // match
-                        foundMatches.append($0.position)
-                        toRemove.insert($0)
-                    } else if currentSymbol != innerSubstring[$0.idx + 1] {
-                        // distance should be increased
-                        $0.distance += 1
-                        $0.idx += 1
-                        // if distance from pattern is greater than desired
-                        // mismatch, should be removed
-                        if $0.distance > distance {
-                            toRemove.insert($0)
-                        }
-                    } else {
-                        // still match, increase number of matching symbols
-                        $0.idx += 1
-                    }
-                }
-                matches.removeAll(where: { toRemove.contains($0) })
-
-                // step 2: check if current symbol is a start of a new match
-                if innerSubstring[0] == currentSymbol {
-                    matches.append(Match(position: idx))
-                } else if distance > 0 {
-                    let match = Match(position: idx)
-                    match.distance = 1
-                    matches.append(match)
-                }
+                action(currentSymbol, idx)
                 idx += 1
             }
 
@@ -541,40 +561,10 @@ extension GOESP {
             queueIdx -= 1
         }
         for symbol in currentLevel {
-            var toRemove = Set<Match>()
-            matches.forEach {
-                if $0.idx == substring.count - 1 {
-                    // match
-                    foundMatches.append($0.position)
-                    toRemove.insert($0)
-                } else if symbol != innerSubstring[$0.idx + 1] {
-                    // distance should be increased
-                    $0.distance += 1
-                    $0.idx += 1
-                    // if distance from pattern is greater than desired
-                    // mismatch, should be removed
-                    if $0.distance > distance {
-                        toRemove.insert($0)
-                    }
-                } else {
-                    // still match, increase number of matching symbols
-                    $0.idx += 1
-                }
-            }
-            matches.removeAll(where: { toRemove.contains($0) })
-
-            // new match
-            if symbol == innerSubstring[0] {
-                matches.append(Match(position: idx))
-            } else if distance > 0 {
-                let match = Match(position: idx)
-                match.distance = 1
-                matches.append(match)
-            }
+            action(symbol, idx)
             idx += 1
         }
-
-        foundMatches.append(contentsOf: matches.compactMap { $0.idx == innerSubstring.count - 1 ? $0.position : nil })
-        return foundMatches
     }
 }
+
+
