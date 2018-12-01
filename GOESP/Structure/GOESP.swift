@@ -367,10 +367,13 @@ extension GOESP {
         var idx: Int
         var distance: Int
 
-        init(position: Int) {
+        var embedding: Embedding
+
+        init(position: Int, symbol: Int) {
             self.position = position
             self.idx = 0
             self.distance = 0
+            self.embedding = [[symbol]]
         }
 
         static func ==(lhs: Match, rhs: Match) -> Bool {
@@ -383,6 +386,22 @@ extension GOESP {
 
         var debugDescription: String {
             return "\(position) \(idx)"
+        }
+
+        func append(symbol: Int, level: Int) {
+            if embedding.count < level + 1 {
+                embedding.append([symbol])
+            } else {
+                embedding[level].append(symbol)
+            }
+        }
+
+        func replaceLastTwo(symbol: Int, level: Int) {
+            _ = embedding[level - 1].popLast()
+            if !embedding[level - 1].isEmpty {
+                _ = embedding[level - 1].popLast()
+            }
+            append(symbol: symbol, level: level)
         }
     }
 
@@ -423,7 +442,7 @@ extension GOESP {
 
                 // step 2: check if current symbol is a start of a new match
                 if innerSubstring[0] == currentSymbol {
-                    matches.append(Match(position: idx))
+                    matches.append(Match(position: idx, symbol: currentSymbol))
                 }
                 idx += 1
             }
@@ -509,9 +528,9 @@ extension GOESP {
 
             // step 2: check if current symbol is a start of a new match
             if innerSubstring[0] == symbol {
-                matches.append(Match(position: idx))
+                matches.append(Match(position: idx, symbol: symbol))
             } else if distance > 0 {
-                let match = Match(position: idx)
+                let match = Match(position: idx, symbol: symbol)
                 match.distance = 1
                 matches.append(match)
             }
@@ -736,6 +755,139 @@ extension GOESP {
             result.append(newResult)
         }
         return result
+    }
+}
+
+extension GOESP {
+    func searchDeep2(substring: String, distance: Int = 0) -> [Int] {
+        // map to internal symbols
+        var innerSubstring = [Int]()
+        for symb in substring {
+            guard let innerSymbol = alph.firstIndex(of: String(symb)) else {
+                // mismatch
+                return []
+            }
+            innerSubstring.append(innerSymbol)
+        }
+
+        var foundMatches = [Int]()
+        var matches = [Match]()
+        var embeddings = Set<Embedding>()
+        let substringHeight = Int(floor(log2(Double(substring.count))))
+
+        let action = { (symbol: Int, idx: Int) in
+            var toRemove = Set<Match>()
+            matches.forEach {
+                if $0.idx == substring.count - 1 {
+                    // match
+                    foundMatches.append($0.position)
+                    toRemove.insert($0)
+                    embeddings.insert($0.embedding)
+                } else if symbol != innerSubstring[$0.idx + 1] {
+                    // distance should be increased
+                    $0.distance += 1
+                    $0.idx += 1
+                    // if distance from pattern is greater than desired
+                    // mismatch, should be removed
+                    if $0.distance > distance {
+                        toRemove.insert($0)
+                    }
+                } else {
+                    // still match, increase number of matching symbols
+                    $0.idx += 1
+                    $0.append(symbol: symbol, level: 0)
+                }
+            }
+            matches.removeAll(where: { toRemove.contains($0) })
+
+            // step 2: check if current symbol is a start of a new match
+            if innerSubstring[0] == symbol {
+                matches.append(Match(position: idx, symbol: symbol))
+            } else if distance > 0 {
+                let match = Match(position: idx, symbol: symbol)
+                match.distance = 1
+                matches.append(match)
+            }
+        }
+
+        var visited = Set<Node>()
+        var stack = [Node(symbol: 0, level: 0, pos: 0)] // start with the most left, the lowest
+        var idx = 0
+
+        while !stack.isEmpty {
+            let current = stack.popLast()!
+            visited.insert(current)
+
+            let currentSymbol = queues[current.level][current.symbol]
+
+            // step 1: when travel throught the lowest level,
+            // check for all matches if still matches
+            if current.level == 0 {
+                action(currentSymbol, idx)
+                idx += 1
+            }
+
+            // step 3: moving
+            if current.level > 0 {
+                // if could move to left child, move down
+                let childNode = Node(symbol: currentSymbol << 1, level: current.level - 1, pos: current.pos << 1)
+                if !visited.contains(childNode) {
+                    visited.insert(childNode)
+                    stack.append(current)
+                    stack.append(childNode)
+                    continue
+                }
+            }
+
+            if current.symbol & 1 == 0, queues[current.level].count > current.symbol + 1 {
+                // if could move to right sibling, move right
+                let rightNode = Node(symbol: current.symbol + 1, level: current.level, pos: current.pos + 1)
+                stack.append(rightNode)
+                continue
+            }
+
+            if current.level < queues.count - 1 {
+                let parentSymbol = current.pos >> 1
+                let parentNode = Node(symbol: parentSymbol, level: current.level + 1, pos: parentSymbol)
+                if parentNode.level <= substringHeight {
+                    matches.forEach {
+                        $0.replaceLastTwo(symbol: queues[parentNode.level][parentSymbol], level: parentNode.level)
+                    }
+                }
+                if !visited.contains(parentNode), parentNode.symbol < queues[parentNode.level].count {
+                    stack.append(parentNode)
+                }
+            }
+        }
+
+        // the most right
+        var queueIdx = queues.count - 2
+        var currentLevel = [Int]()
+        var nextLevel = [Int]()
+        while queueIdx >= 0 {
+            nextLevel = []
+            currentLevel.forEach {
+                nextLevel.append(queues[queueIdx][$0 << 1])
+                nextLevel.append(queues[queueIdx][$0 << 1 + 1])
+            }
+            // extra symbol
+            if queues[queueIdx].count & 1 == 1 {
+                nextLevel.append(queues[queueIdx].last!)
+            }
+            currentLevel = nextLevel
+            queueIdx -= 1
+        }
+        for symbol in currentLevel {
+            action(symbol, idx)
+            idx += 1
+        }
+        foundMatches.append(contentsOf: matches.compactMap {
+            guard $0.idx == innerSubstring.count - 1 else { return nil }
+            embeddings.insert($0.embedding)
+            return $0.position
+        })
+        print(embeddings)
+        return foundMatches
     }
 }
 
