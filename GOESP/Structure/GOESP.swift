@@ -827,6 +827,22 @@ extension GOESP {
                 idx += 1
             }
 
+            //var found = false
+            for embedding in embeddings {
+                guard embedding.count - 1 == current.level else {
+                    continue
+                }
+                guard embedding.last![0] == currentSymbol else {
+                    continue
+                }
+                // match
+                //foundMatches.append(idx)
+                //found = true
+                print(embedding)
+                print(current)
+                print(idx)
+            }
+
             // step 3: moving
             if current.level > 0 {
                 // if could move to left child, move down
@@ -886,7 +902,7 @@ extension GOESP {
             embeddings.insert($0.embedding)
             return $0.position
         })
-        print(embeddings)
+        //print(embeddings)
         return foundMatches
     }
 }
