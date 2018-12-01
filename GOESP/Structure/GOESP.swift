@@ -122,7 +122,7 @@ private extension GOESP {
         append(symbol: rule, to: queueIdx + 1)
     }
 
-    func rule(left: Int, right: Int, in queueIdx: Int) -> Int? {
+    func rule(left: Int?, right: Int?, in queueIdx: Int) -> Int? {
         guard queueIdx < queues.count else {
             return nil
         }
@@ -136,8 +136,42 @@ private extension GOESP {
             if queue[idx] == left, queue[idx + 1] == right {
                 return i
             }
+            if queue[idx] == left, nil == right {
+                return i
+            }
+            if queue[idx + 1] == right, nil == left {
+                return i
+            }
         }
         return nil
+    }
+
+    func rules(left: Int?, right: Int?, in queueIdx: Int) -> [Int] {
+        guard queueIdx < queues.count else {
+            return []
+        }
+        let queue = queues[queueIdx]
+        let count = queue.count / 2
+        guard count >= 0 else {
+            return []
+        }
+        var result = [Int]()
+        for i in 0..<count {
+            let idx = i * 2
+            if queue[idx] == left, queue[idx + 1] == right {
+                result.append(i)
+                continue
+            }
+            if queue[idx] == left, nil == right {
+                result.append(i)
+                continue
+            }
+            if queue[idx + 1] == right, nil == left {
+                result.append(i)
+                continue
+            }
+        }
+        return result
     }
 }
 
@@ -564,6 +598,144 @@ private extension GOESP {
             action(symbol, idx)
             idx += 1
         }
+    }
+}
+
+extension GOESP {
+    typealias Embedding = [[Int]]
+
+    func embedToNextLevel(current: [Int], level: Int) -> [Int] {
+        var result = mapToNextLevel(current: current, level: level, startIdx: 0)
+        guard result.isEmpty else {
+            return result
+        }
+        guard let firstRule = self.rule(left: nil, right: current[0], in: level) else {
+            return result
+        }
+        result.append(firstRule)
+        let resultSuffux = mapToNextLevel(current: current, level: level, startIdx: 1)
+        guard !resultSuffux.isEmpty else {
+            return []
+        }
+        result += resultSuffux
+        return result
+    }
+
+    private func mapToNextLevel(current: [Int], level: Int, startIdx: Int) -> [Int] {
+        var idx = startIdx
+        var result = [Int]()
+        while idx < current.count - 1 {
+            let left = current[idx]
+            let right = current[idx + 1]
+            if let rule = self.rule(left: left, right: right, in: level) {
+                result.append(rule)
+            } else {
+                return []
+            }
+            idx += 2
+        }
+        guard (current.count - startIdx) & 1 == 1 else {
+            return result
+        }
+        guard let lastRule = self.rule(left: current.last!, right: nil, in: level) else {
+            return []
+        }
+        result.append(lastRule)
+        return result
+    }
+
+    func embed(substring: String) -> Embedding? {
+        var result = [[Int]]()
+        result.append([])
+        for symbol in substring {
+            guard let alphSymbol = alph.firstIndex(of: String(symbol)) else {
+                return nil
+            }
+            result[0].append(alphSymbol)
+        }
+        var level = 0
+        while result[level].count > 1 {
+            result.append(embedToNextLevel(current: result[level], level: level))
+            level += 1
+        }
+        return result
+    }
+}
+
+extension GOESP {
+    func embedAll(substring: String) -> [Embedding] {
+        var result = [Embedding]()
+        var innerString = [Int]()
+        for symbol in substring {
+            guard let alphSymbol = alph.firstIndex(of: String(symbol)) else {
+                return []
+            }
+            innerString.append(alphSymbol)
+        }
+        result.append([innerString])
+
+        var level = 0
+        while nil != result.first(where: { $0.last!.count > 1}) {
+            var newResult = [Embedding]()
+            result.forEach {
+                let next = embedToNextLevelAll(current: $0.last!, level: level)
+                guard !next.isEmpty else {
+                    return
+                }
+                for nextLevel in next {
+                    newResult.append($0 + [nextLevel])
+                }
+            }
+            result = newResult
+            level += 1
+        }
+        return result
+    }
+
+    func embedToNextLevelAll(current: [Int], level: Int) -> [[Int]] {
+        var result = mapToNextLevelAll(current: current, level: level, startIdx: 0)
+        let firstRules = self.rules(left: nil, right: current[0], in: level)
+        guard !firstRules.isEmpty else {
+            return result
+        }
+        let resultSuffuxes = mapToNextLevelAll(current: current, level: level, startIdx: 1)
+        guard !resultSuffuxes.isEmpty else {
+            return result
+        }
+        firstRules.forEach { rule in
+            resultSuffuxes.forEach { suffix in
+                result.append([rule] + suffix)
+            }
+        }
+        return result
+    }
+
+    private func mapToNextLevelAll(current: [Int], level: Int, startIdx: Int) -> [[Int]] {
+        var idx = startIdx
+        var result = [[Int]]()
+        var currentResult = [Int]()
+        while idx < current.count - 1 {
+            let left = current[idx]
+            let right = current[idx + 1]
+            if let rule = self.rule(left: left, right: right, in: level) {
+                currentResult.append(rule)
+            } else {
+                return []
+            }
+            idx += 2
+        }
+        guard (current.count - startIdx) & 1 == 1 else {
+            return [currentResult]
+        }
+        let lastRules = self.rules(left: current.last!, right: nil, in: level)
+        guard !lastRules.isEmpty else {
+            return []
+        }
+        lastRules.forEach {
+            let newResult = currentResult + [$0]
+            result.append(newResult)
+        }
+        return result
     }
 }
 
