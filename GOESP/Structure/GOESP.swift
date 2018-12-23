@@ -801,7 +801,7 @@ extension GOESP {
         }
     }
 
-    func searchDeep2(substring: String, distance: Int = 0) -> [Int] {
+    func searchDeep2(substring: String, distance: Int = 0, nodeSelectionHandler: ((Int, Int) -> Void)? = nil) -> [Int] {
         // map to internal symbols
         var innerSubstring = [Int]()
         for symb in substring {
@@ -861,6 +861,7 @@ extension GOESP {
 
         while !stack.isEmpty {
             let current = stack.popLast()!
+            nodeSelectionHandler?(current.position, current.level)
             visited.insert(current)
 
             let currentSymbol = queues[current.level][current.position]
