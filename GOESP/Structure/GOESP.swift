@@ -367,13 +367,16 @@ extension GOESP {
         var idx: Int
         var distance: Int
 
-        var embedding: Embedding
+        var embedding: [Node]
 
-        init(position: Int, symbol: Int) {
+        init(position: Int, node: Node? = nil) {
             self.position = position
             self.idx = 0
             self.distance = 0
-            self.embedding = [[symbol]]
+            self.embedding = []
+            if let node = node {
+                embedding.append(node)
+            }
         }
 
         static func ==(lhs: Match, rhs: Match) -> Bool {
@@ -388,20 +391,17 @@ extension GOESP {
             return "\(position) \(idx)"
         }
 
-        func append(symbol: Int, level: Int) {
-            if embedding.count < level + 1 {
-                embedding.append([symbol])
-            } else {
-                embedding[level].append(symbol)
-            }
+        func append(node: Node) {
+            embedding.append(node)
         }
 
-        func replaceLastTwo(symbol: Int, level: Int) {
-            _ = embedding[level - 1].popLast()
-            if !embedding[level - 1].isEmpty {
-                _ = embedding[level - 1].popLast()
+        func replaceLastTwo(node: Node) {
+            for _ in 0..<2 {
+                if !embedding.isEmpty {
+                    _ = embedding.popLast()
+                }
             }
-            append(symbol: symbol, level: level)
+            embedding.append(node)
         }
     }
 
@@ -442,7 +442,7 @@ extension GOESP {
 
                 // step 2: check if current symbol is a start of a new match
                 if innerSubstring[0] == currentSymbol {
-                    matches.append(Match(position: idx, symbol: currentSymbol))
+                    matches.append(Match(position: idx))
                 }
                 idx += 1
             }
@@ -528,9 +528,9 @@ extension GOESP {
 
             // step 2: check if current symbol is a start of a new match
             if innerSubstring[0] == symbol {
-                matches.append(Match(position: idx, symbol: symbol))
+                matches.append(Match(position: idx))
             } else if distance > 0 {
-                let match = Match(position: idx, symbol: symbol)
+                let match = Match(position: idx)
                 match.distance = 1
                 matches.append(match)
             }
@@ -759,6 +759,48 @@ extension GOESP {
 }
 
 extension GOESP {
+    typealias Embedding2 = [Node2]
+
+    final class Match2: Equatable, Hashable {
+        let index: Int              // index of match
+        var offset: Int             // number of currently found symbols
+        var embedding: Embedding2   // embedding of match to GOESP
+        var distance: Int           // number of currently found not matched symbols
+
+        init(index: Int, node: Node2) {
+            self.index = index
+            self.offset = 0
+            self.embedding = [node]
+            self.distance = 0
+        }
+
+        static func == (lhs: Match2, rhs: Match2) -> Bool {
+            return lhs.index == rhs.index && lhs.offset == rhs.offset
+        }
+
+        var hashValue: Int {
+            return index + offset
+        }
+    }
+
+    struct Node2: Equatable, Hashable, CustomDebugStringConvertible {
+        let position: Int           // position of symbol in queue
+        let level: Int              // index of queue
+        let offset: Int             // offset from the start of the queue
+
+        static func == (lhs: Node2, rhs: Node2) -> Bool {
+            return lhs.position == rhs.position && lhs.level == rhs.level && lhs.offset == rhs.offset
+        }
+
+        var hashValue: Int {
+            return position + level
+        }
+
+        var debugDescription: String {
+            return "\(offset)"
+        }
+    }
+
     func searchDeep2(substring: String, distance: Int = 0) -> [Int] {
         // map to internal symbols
         var innerSubstring = [Int]()
@@ -771,22 +813,25 @@ extension GOESP {
         }
 
         var foundMatches = [Int]()
-        var matches = [Match]()
-        var embeddings = Set<Embedding>()
+        var matches = [Match2]()
+        var embeddings = [Embedding2: Int]()
         let substringHeight = Int(floor(log2(Double(substring.count))))
 
-        let action = { (symbol: Int, idx: Int) in
-            var toRemove = Set<Match>()
+        let action = { [weak self] (node: Node2, idx: Int) in
+            guard let self = self else { return }
+            let symbol = self.queues[node.level][node.position]
+            var toRemove = Set<Match2>()
             matches.forEach {
-                if $0.idx == substring.count - 1 {
+                if $0.offset == substring.count - 1 {
                     // match
-                    foundMatches.append($0.position)
+                    foundMatches.append($0.index)
                     toRemove.insert($0)
-                    embeddings.insert($0.embedding)
-                } else if symbol != innerSubstring[$0.idx + 1] {
+                    let count = embeddings[$0.embedding] ?? 0
+                    embeddings[$0.embedding] = count + 1
+                } else if symbol != innerSubstring[$0.offset + 1] {
                     // distance should be increased
                     $0.distance += 1
-                    $0.idx += 1
+                    $0.offset += 1
                     // if distance from pattern is greater than desired
                     // mismatch, should be removed
                     if $0.distance > distance {
@@ -794,43 +839,44 @@ extension GOESP {
                     }
                 } else {
                     // still match, increase number of matching symbols
-                    $0.idx += 1
-                    $0.append(symbol: symbol, level: 0)
+                    $0.offset += 1
+                    $0.embedding.append(node)
                 }
             }
             matches.removeAll(where: { toRemove.contains($0) })
 
             // step 2: check if current symbol is a start of a new match
             if innerSubstring[0] == symbol {
-                matches.append(Match(position: idx, symbol: symbol))
+                matches.append(Match2(index: idx, node: node))
             } else if distance > 0 {
-                let match = Match(position: idx, symbol: symbol)
+                let match = Match2(index: idx, node: node)
                 match.distance = 1
                 matches.append(match)
             }
         }
 
-        var visited = Set<Node>()
-        var stack = [Node(symbol: 0, level: 0, pos: 0)] // start with the most left, the lowest
+        var visited = Set<Node2>()
+        var stack = [Node2(position: 0, level: 0, offset: 0)] // start with the most left, the lowest
         var idx = 0
 
         while !stack.isEmpty {
             let current = stack.popLast()!
             visited.insert(current)
 
-            let currentSymbol = queues[current.level][current.symbol]
+            let currentSymbol = queues[current.level][current.position]
 
             // step 1: when travel throught the lowest level,
             // check for all matches if still matches
             if current.level == 0 {
-                action(currentSymbol, idx)
+                print(current)
+                action(current, idx)
                 idx += 1
             }
 
             // step 3: moving
             if current.level > 0 {
                 // if could move to left child, move down
-                let childNode = Node(symbol: currentSymbol << 1, level: current.level - 1, pos: current.pos << 1)
+                let childNode = Node2(position: currentSymbol << 1, level: current.level - 1, offset: current.offset << 1)
                 if !visited.contains(childNode) {
                     visited.insert(childNode)
                     stack.append(current)
@@ -839,25 +885,18 @@ extension GOESP {
                 }
             }
 
-            if current.symbol & 1 == 0, queues[current.level].count > current.symbol + 1 {
+            if current.position & 1 == 0, queues[current.level].count > current.position + 1 {
                 // if could move to right sibling, move right
-                let rightNode = Node(symbol: current.symbol + 1, level: current.level, pos: current.pos + 1)
+                let rightNode = Node2(position: current.position + 1, level: current.level, offset: current.offset + 1)
                 stack.append(rightNode)
                 continue
             }
 
             if current.level < queues.count - 1 {
-                let parentSymbol = current.pos >> 1
-                let parentNode = Node(symbol: parentSymbol, level: current.level + 1, pos: parentSymbol)
-                if parentNode.symbol < queues[parentNode.level].count {
-                    if parentNode.level <= substringHeight {
-                        matches.forEach {
-                            $0.replaceLastTwo(symbol: queues[parentNode.level][parentSymbol], level: parentNode.level)
-                        }
-                    }
-                    if !visited.contains(parentNode) {
-                        stack.append(parentNode)
-                    }
+                let parentSymbol = current.offset >> 1
+                let parentNode = Node2(position: parentSymbol, level: current.level + 1, offset: parentSymbol)
+                if parentNode.position < queues[parentNode.level].count, !visited.contains(parentNode) {
+                    stack.append(parentNode)
                 }
             }
         }
@@ -880,14 +919,15 @@ extension GOESP {
             queueIdx -= 1
         }
         for symbol in currentLevel {
-            action(symbol, idx)
+            action(Node2(position: symbol, level: 0, offset: idx), idx)
             idx += 1
         }
         foundMatches.append(contentsOf: matches.compactMap {
-            guard $0.idx == innerSubstring.count - 1 else { return nil }
-            embeddings.insert($0.embedding)
-            return $0.position
+            guard $0.offset == innerSubstring.count - 1 else { return nil }
+            //embeddings.insert($0.embedding)
+            return $0.index
         })
+        print(embeddings.count)
         print(embeddings)
         return foundMatches
     }

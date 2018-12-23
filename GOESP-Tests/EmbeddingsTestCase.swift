@@ -18,14 +18,27 @@ final class EmbeddingsTestCase: XCTestCase {
         //XCTAssertEqual([0, 2, 5, 7, 9], grammar2.searchDeep2(substring: "CA"))
     }
 
+    func testError() {
+        let str = "ACCACGGGACGCACGCACCACT"
+        let grammar = GOESP.build(str: str)
+        let substr = "AC"
+        XCTAssertEqual(str.indicesOf(string: substr), grammar.searchDeep2(substring: substr))
+    }
+
     func testSearchOnRandomStrings() {
         let alph = ["A", "C", "G", "T"]
         let grammar = GOESP()
         var str = ""
-        for _ in 0..<500 {
+        for idx in 0..<100 {
             let randIdx = Int(arc4random_uniform(UInt32(UInt(alph.count))))
-            grammar.append(symbol: alph[randIdx])
-            str.append(alph[randIdx])
+            let symbol: String
+            switch idx % 8 {
+            case 0: symbol = "A"
+            case 1: symbol = "C"
+            default: symbol = alph[randIdx]
+            }
+            grammar.append(symbol: symbol)
+            str.append(symbol)
 
             ["AC"].forEach {
                 print("\(str.count)")
